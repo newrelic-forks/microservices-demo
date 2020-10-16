@@ -19,21 +19,20 @@ import random
 import time
 import traceback
 from concurrent import futures
-
-import grpc
-
-from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpanProcessor, BatchExportSpanProcessor
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
-from exporter import NewRelicSpanExporter
+from urllib.parse import urlparse
 
 import demo_pb2
 import demo_pb2_grpc
-
+import grpc
+from exporter import NewRelicSpanExporter
 from logger import getJSONLogger
-logger = getJSONLogger('recommendationservice-server')
+from opentelemetry import trace
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+
+logger = getJSONLogger("recommendationservice-server")
 
 
 trace.set_tracer_provider(
@@ -42,7 +41,8 @@ trace.set_tracer_provider(
 trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(
         NewRelicSpanExporter(
-            os.environ["NEW_RELIC_API_KEY"]
+            os.environ["NEW_RELIC_API_KEY"],
+            host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
         ),
         schedule_delay_millis=500,
     )
@@ -50,13 +50,14 @@ trace.get_tracer_provider().add_span_processor(
 grpc_server_instrumentor = GrpcInstrumentorServer()
 grpc_server_instrumentor.instrument()
 
+
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
-        filtered_products = list(set(product_ids)-set(request.product_ids))
+        filtered_products = list(set(product_ids) - set(request.product_ids))
         num_products = len(filtered_products)
         num_return = min(max_responses, num_products)
         # sample list of indicies to return
@@ -73,10 +74,10 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    port = os.environ.get('PORT', "8080")
-    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
+    port = os.environ.get("PORT", "8080")
+    catalog_addr = os.environ.get("PRODUCT_CATALOG_SERVICE_ADDR", "")
     if catalog_addr == "":
-        raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
+        raise Exception("PRODUCT_CATALOG_SERVICE_ADDR environment variable not set")
     logger.info("product catalog address: " + catalog_addr)
     channel = grpc.insecure_channel(catalog_addr)
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
@@ -90,12 +91,12 @@ if __name__ == "__main__":
 
     # start server
     logger.info("listening on port: " + port)
-    server.add_insecure_port('[::]:'+port)
+    server.add_insecure_port("[::]:" + port)
     server.start()
 
     # keep alive
     try:
-         while True:
+        while True:
             time.sleep(10000)
     except KeyboardInterrupt:
-            server.stop(0)
+        server.stop(0)
