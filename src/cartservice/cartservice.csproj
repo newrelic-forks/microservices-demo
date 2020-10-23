@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,11 @@
     <PackageReference Include="grpc.tools" Version="1.12.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="OpenTelemetry" Version="0.7.0-beta.1" />
+    <PackageReference Include="NewRelic.OpenTelemetry" Version="1.0.0-beta.202" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="0.7.0-beta.1" />
   </ItemGroup>
 
   <ItemGroup>
