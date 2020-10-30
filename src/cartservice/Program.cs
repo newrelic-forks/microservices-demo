@@ -63,7 +63,7 @@ namespace cartservice
                     if (redisCartStore != null)
                     {
                             tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
-                           .AddRedisInstrumentation(redisCartStore.Redis)
+                           .AddRedisInstrumentation(redisCartStore.ConnectionMultiplexer)
                            .AddSource(CartActivity.ActivitySourceName)
                            .SetResource(Resources.CreateServiceResource(CartActivity.ActivitySourceName))
                            .AddNewRelicExporter(options =>

@@ -31,7 +31,7 @@ namespace cartservice.cartstore
         private const string CART_FIELD_NAME = "cart";
         private const int REDIS_RETRY_NUM = 5;
 
-        public ConnectionMultiplexer Redis => redis;
+        public ConnectionMultiplexer ConnectionMultiplexer => redis;
         private volatile ConnectionMultiplexer redis;
         private volatile bool isRedisConnectionOpened = false;
 
