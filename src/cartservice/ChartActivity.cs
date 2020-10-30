@@ -6,9 +6,8 @@ namespace cartservice
 
     internal static class CartActivity
     {
-        public static readonly ActivitySource ActivitySource = new ActivitySource("cartservice");
-
-        public const string ActivityName = "cartservice";
+        public const string ActivitySourceName = "CartService";
+        public static readonly ActivitySource ActivitySource = new ActivitySource(ActivitySourceName);
     }
     
 }
