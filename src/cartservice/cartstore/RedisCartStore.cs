@@ -117,44 +117,43 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
 
-            using (var parent = CartActivity.ActivitySource.StartActivity("AddItem", ActivityKind.Server))
+            using var parent = CartActivity.ActivitySource.StartActivity("AddItem", ActivityKind.Server);
+
+            try
             {
-                try
+                EnsureRedisConnected();
+
+                var db = redis.GetDatabase();
+
+                // Access the cart from the cache
+                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+                Hipstershop.Cart cart;
+                if (value.IsNull)
                 {
-                    EnsureRedisConnected();
-
-                    var db = redis.GetDatabase();
-
-                    // Access the cart from the cache
-                    var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-                    Hipstershop.Cart cart;
-                    if (value.IsNull)
+                    cart = new Hipstershop.Cart();
+                    cart.UserId = userId;
+                    cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+                }
+                else
+                {
+                    cart = Hipstershop.Cart.Parser.ParseFrom(value);
+                    var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
+                    if (existingItem == null)
                     {
-                        cart = new Hipstershop.Cart();
-                        cart.UserId = userId;
                         cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
                     }
                     else
                     {
-                        cart = Hipstershop.Cart.Parser.ParseFrom(value);
-                        var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
-                        if (existingItem == null)
-                        {
-                            cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
-                        }
-                        else
-                        {
-                            existingItem.Quantity += quantity;
-                        }
+                        existingItem.Quantity += quantity;
                     }
+                }
 
-                    await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
-                }
-                catch (Exception ex)
-                {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-                }
+                await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+            }
+            catch (Exception ex)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
             }
         }
 
@@ -162,20 +161,19 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"EmptyCartAsync called with userId={userId}");
 
-            using (var parent = CartActivity.ActivitySource.StartActivity("EmptyCart", ActivityKind.Server))
-            {
-                try
-                {
-                    EnsureRedisConnected();
-                    var db = redis.GetDatabase();
+            using var parent = CartActivity.ActivitySource.StartActivity("EmptyCart", ActivityKind.Server);
 
-                    // Update the cache with empty cart for given user
-                    await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
-                }
-                catch (Exception ex)
-                {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-                }
+            try
+            {
+                EnsureRedisConnected();
+                var db = redis.GetDatabase();
+
+                // Update the cache with empty cart for given user
+                await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
+            }
+            catch (Exception ex)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
             }
         }
 
@@ -183,29 +181,28 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"GetCartAsync called with userId={userId}");
 
-            using (var parent = CartActivity.ActivitySource.StartActivity("GetCart", ActivityKind.Server))
+            using var parent = CartActivity.ActivitySource.StartActivity("GetCart", ActivityKind.Server);
+            
+            try
             {
-                try
+                EnsureRedisConnected();
+
+                var db = redis.GetDatabase();
+
+                // Access the cart from the cache
+                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+                if (!value.IsNull)
                 {
-                    EnsureRedisConnected();
-
-                    var db = redis.GetDatabase();
-
-                    // Access the cart from the cache
-                    var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-                    if (!value.IsNull)
-                    {
-                        return Hipstershop.Cart.Parser.ParseFrom(value);
-                    }
-
-                    // We decided to return empty cart in cases when user wasn't in the cache before
-                    return new Hipstershop.Cart();
+                    return Hipstershop.Cart.Parser.ParseFrom(value);
                 }
-                catch (Exception ex)
-                {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-                }
+
+                // We decided to return empty cart in cases when user wasn't in the cache before
+                return new Hipstershop.Cart();
+            }
+            catch (Exception ex)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
             }
         }
 
