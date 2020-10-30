@@ -21,6 +21,7 @@ using cartservice.interfaces;
 using CommandLine;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace cartservice
@@ -64,12 +65,12 @@ namespace cartservice
                             tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
                            .AddRedisInstrumentation(redisCartStore.Redis)
                            .AddSource(CartActivity.ActivitySourceName)
+                           .SetResource(Resources.CreateServiceResource(CartActivity.ActivitySourceName))
                            .AddNewRelicExporter(options =>
                            {
 
                                options.ApiKey = Environment.GetEnvironmentVariable("NEW_RELIC_API_KEY");
                                options.EndpointUrl = new Uri(Environment.GetEnvironmentVariable("NEW_RELIC_TRACE_URL"));
-                               options.ServiceName = "CartService";
                            })
                            .Build();
                     }
