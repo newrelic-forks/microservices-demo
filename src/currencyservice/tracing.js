@@ -2,7 +2,7 @@
 const { NodeTracerProvider } = require('@opentelemetry/node')
 const { BatchSpanProcessor } = require('@opentelemetry/tracing')
 const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin')
-const { CollectorTraceExporter } =  require('@opentelemetry/exporter-collector-grpc');
+const { CollectorTraceExporter } =  require('@opentelemetry/exporter-collector-grpc')
 const { Resource, SERVICE_RESOURCE } = require('@opentelemetry/resources')
 const os = require('os')
 
