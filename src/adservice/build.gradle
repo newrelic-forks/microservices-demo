@@ -44,9 +44,7 @@ dependencies {
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
-                // "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-api-metrics:${openTelemetryAlphaVersion}",
-                // "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryAlphaVersion}",
                 "com.newrelic.agent.java:newrelic-api:5.14.0",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
