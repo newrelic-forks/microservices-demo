@@ -23,5 +23,8 @@
 
   <ItemGroup>
     <Protobuf Include="protos\Cart.proto" GrpcServices="Server" />
+    <Protobuf Include="protos\opentelemetry\**\*.proto" Access="internal">
+      <ProtoRoot>protos</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 </Project>
