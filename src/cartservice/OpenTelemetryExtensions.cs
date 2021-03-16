@@ -57,7 +57,7 @@ namespace cartservice.OpenTelemetry
         private static (Uri endpoint, string headers) GetOptions()
         {
             var newRelicApiKey = Environment.GetEnvironmentVariable("NEW_RELIC_API_KEY");
-            var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+            var otlpEndpoint = "https://" + Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
             return (new Uri(otlpEndpoint), $"api-key={newRelicApiKey}");
         }
     }
