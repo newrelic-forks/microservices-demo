@@ -57,7 +57,6 @@ build:
             NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
             NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
             OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-            NEW_RELIC_DEMO_EXPORT_TYPE: "{{.NEW_RELIC_DEMO_EXPORT_TYPE}}"
   - image: currencyservice
     context: src/currencyservice
     docker:
@@ -66,7 +65,6 @@ build:
             NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
             NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
             OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-            NEW_RELIC_DEMO_EXPORT_TYPE: "{{.NEW_RELIC_DEMO_EXPORT_TYPE}}"
   - image: cartservice
     context: src/cartservice
     docker:
