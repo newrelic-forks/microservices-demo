@@ -359,6 +359,7 @@ public final class AdService {
     String serviceName = "AdService";
     Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName));
     InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
+    InstrumentSelector selectorHistogram = InstrumentSelector.builder().setInstrumentType(InstrumentType.HISTOGRAM).build();
 
     // TODO: Generate resource from OTEL_RESOURCE_ATTRIBUTES
     SdkMeterProvider meterProvider = SdkMeterProvider.builder()
@@ -366,8 +367,11 @@ public final class AdService {
         .registerView(selectorUpDownCounter, View.builder()
             .setAttributesProcessor(AttributesProcessor.noop())
             .setAggregation(Aggregation.sum(AggregationTemporality.DELTA))
+            .build())
+        .registerView(selectorHistogram, View.builder()
+            .setAttributesProcessor(AttributesProcessor.noop())
             .setAggregation(Aggregation.explictBucketHistogram(AggregationTemporality.DELTA))
-        .build())
+            .build())
         .build();
 
     IntervalMetricReader.builder()
