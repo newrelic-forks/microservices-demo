@@ -25,8 +25,8 @@ def opencensusVersion = "0.27.0"
 def grpcVersion = "1.35.0"
 def jacksonVersion = "2.12.1"
 def protocVersion = "3.12.3"
-def openTelemetryVersion = "1.1.0"
-def openTelemetryAlphaVersion = "1.1.0-alpha"
+def openTelemetryVersion = "1.6.0"
+def openTelemetryAlphaVersion = "1.6.0-alpha"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
