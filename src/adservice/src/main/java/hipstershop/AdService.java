@@ -370,7 +370,7 @@ public final class AdService {
         .registerView(selectorHistogram, View.builder()
             .setAggregation(Aggregation.explictBucketHistogram(AggregationTemporality.DELTA))
             .build())
-        .build();
+        .buildAndRegisterGlobal();
 
     IntervalMetricReader.builder()
         .setExportIntervalMillis(2000)
@@ -379,9 +379,7 @@ public final class AdService {
             .addHeader("api-key", System.getenv("NEW_RELIC_API_KEY"))
             .build())
         .setMetricProducers(List.of(meterProvider))
-        .build();
-
-    GlobalMeterProvider.set(meterProvider);
+        .buildAndStart();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
