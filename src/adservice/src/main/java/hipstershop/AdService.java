@@ -365,11 +365,9 @@ public final class AdService {
     SdkMeterProvider meterProvider = SdkMeterProvider.builder()
         .setResource(resource)
         .registerView(selectorUpDownCounter, View.builder()
-            .setAttributesProcessor(AttributesProcessor.noop())
             .setAggregation(Aggregation.sum(AggregationTemporality.DELTA))
             .build())
         .registerView(selectorHistogram, View.builder()
-            .setAttributesProcessor(AttributesProcessor.noop())
             .setAggregation(Aggregation.explictBucketHistogram(AggregationTemporality.DELTA))
             .build())
         .build();
