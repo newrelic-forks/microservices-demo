@@ -132,9 +132,3 @@ If you've deployed the application with `skaffold run` command, you can run
 If you get the following error: `Error from server (NotFound): error when creating "STDIN": namespaces "opentelemetry-demo" not found` then run the following command:
 
     `kubectl config set-context --current --namespace=opentelemetry-demo`
-
-## Troubleshooting
-
-If you get the following error: `Error from server (NotFound): error when creating "STDIN": namespaces "opentelemetry-demo" not found` then run the following command:
-
-    `kubectl config set-context --current --namespace=opentelemetry-demo`
