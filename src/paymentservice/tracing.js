@@ -1,35 +1,30 @@
 'use strict'
-const { NodeTracerProvider } = require('@opentelemetry/node')
-const { BatchSpanProcessor } = require('@opentelemetry/tracing')
-const { CollectorTraceExporter } =  require('@opentelemetry/exporter-collector-grpc')
-const { Resource, SERVICE_RESOURCE } = require('@opentelemetry/resources')
-const os = require('os')
 
-const identifier = process.env.HOSTNAME || os.hostname()
-const instanceResource = new Resource({
- [SERVICE_RESOURCE.INSTANCE_ID]: identifier,
- [SERVICE_RESOURCE.NAME]: 'PaymentService'
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { CollectorTraceExporter } =  require('@opentelemetry/exporter-collector-grpc');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require("@opentelemetry/semantic-conventions");
+const os = require('os');
+
+const identifier = process.env.HOSTNAME || os.hostname();
+const resource = new Resource({
+  [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: identifier,
+  [SemanticResourceAttributes.SERVICE_NAME]: 'PaymentService'
 })
 
-const mergedResource = Resource.createTelemetrySDKResource().merge(instanceResource)
+const traceProvider = new NodeTracerProvider({
+  resource,
+});
 
-function getExporter() {
-  return new CollectorTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
-  })
-}
+let url = process.env.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT;
 
-const exporter = getExporter()
+const collectorOptions = {
+  url,
+};
 
-if (exporter != null)
-{
-  const traceProvider = new NodeTracerProvider({
-    resource: mergedResource
-  })
+const traceExporter = new CollectorTraceExporter(collectorOptions);
 
-  traceProvider.addSpanProcessor(
-    new BatchSpanProcessor(exporter)
-  )
+traceProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
 
-  traceProvider.register()
-}
+traceProvider.register();
