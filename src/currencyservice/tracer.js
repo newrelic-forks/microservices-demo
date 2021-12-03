@@ -7,7 +7,7 @@ const {CollectorTraceExporter} = require('@opentelemetry/exporter-collector-grpc
 const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
 const { PinoInstrumentation } = require('@opentelemetry/instrumentation-pino');
 const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require("@opentelemetry/semantic-conventions");
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 const os = require('os');
 
 const identifier = process.env.HOSTNAME || os.hostname();
