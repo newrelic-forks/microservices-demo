@@ -81,12 +81,6 @@ build:
       buildArgs:
         OTEL_EXPORTER_OTLP_ENDPOINT: 'otel-collector:4317'
         OTEL_RESOURCE_ATTRIBUTES: 'service.name=infrastructure'
-  - image: otel-system
-    context: src/otel-system
-    docker:
-      buildArgs:
-        NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
-        NEW_RELIC_METRIC_URL: '{{.NEW_RELIC_METRIC_URL}}'
   tagPolicy:
     gitCommit: {}
   local:
