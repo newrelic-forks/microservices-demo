@@ -10,8 +10,6 @@ namespace cartservice.OpenTelemetry
 {
     public static class OpenTelemetryExtensions
     {
-        public static RedisCartStore BrokenCartStore = new RedisCartStore("badhost:4567");
-
         private static ResourceBuilder ResourceBuilder =
             ResourceBuilder
                 .CreateDefault()
@@ -23,10 +21,7 @@ namespace cartservice.OpenTelemetry
             services.AddOpenTelemetryTracing(builder => {
                 builder.SetResourceBuilder(ResourceBuilder);
                 
-                builder.AddAspNetCoreInstrumentation(options =>
-                {
-                    options.RecordException = true;
-                });
+                builder.AddAspNetCoreInstrumentation();
 
                 if (cartStore is RedisCartStore redisCartStore)
                 {

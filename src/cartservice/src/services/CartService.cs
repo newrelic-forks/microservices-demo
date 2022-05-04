@@ -56,7 +56,7 @@ namespace cartservice.services
         {
             this._cartStore = _random.Next() % 5 != 0 
                 ? this._cartStore
-                : cartservice.OpenTelemetry.OpenTelemetryExtensions.BrokenCartStore;
+                : new RedisCartStore("badhost:4567");
 
             try
             {
