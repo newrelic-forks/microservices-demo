@@ -10,8 +10,8 @@ src/checkoutservice/                                @TylerHelmuth
 src/currencyservice/                                @svetlanabrennan
 src/paymentservice/                                 @svetlanabrennan
 src/emailservice/                                   @TylerHelmuth
-src/recommendationservice                           @TylerHelmuth
-src/loadgenerator                                   @TylerHelmuth @jack-berg
+src/recommendationservice/                          @TylerHelmuth
+src/loadgenerator/                                  @TylerHelmuth @jack-berg
 src/otel-collector/                                 @TylerHelmuth
 src/otel-collector-agent/                           @TylerHelmuth
 src/otel-collector-agent-redis/                     @TylerHelmuth
