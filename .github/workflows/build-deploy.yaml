@@ -1,81 +1,75 @@
 name: "Build and Deploy"
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      environment:
+        description: Which environment to deploy to.  Valid values are `dev`, `staging`, and `prod`.
+        required: true
+        type: string
+      environment-full:
+        description: Full name of environment to deploy to. Valid values are development, staging and production.
+        required: true
+        type: string
+      is-staging:
+        description: Whether or not the deployment is going to New Relic Staging
+        required: true
+        type: string
+      otlp-endpoint:
+        description: OTLP endpoint
+        required: true
+        type: string
+      nr-host:
+        description: New Relic Infa agent
+        required: true
+        type: string
 
 jobs:
-  build-deploy-dev:
-    if: contains('svetlanabrennan,TylerHelmuth,jack-berg,nrcventura,martinkuba,alanwest,reese-lee', github.actor)
+  build-deploy:
     permissions:
         contents: 'read'
         id-token: 'write'
     runs-on: ubuntu-latest
-    environment: development
+    environment: ${{ inputs.environment-full }}
     env:
-      OTEL_EXPORTER_OTLP_ENDPOINT: https://staging-otlp.nr-data.net:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.otlp-endpoint }}
       OTEL_EXPORTER_OTLP_ENDPOINT_INFINITE_TRACING: ${{ secrets.INFINITE_TRACING_ENDPOINT }}"
       NEW_RELIC_API_KEY: ${{ secrets.API_KEY }}
       NEW_RELIC_LICENSE_KEY: ${{ secrets.API_KEY }}
-      NEW_RELIC_HOST: staging-collector.newrelic.com
+      NEW_RELIC_HOST: ${{ inputs.nr-host }}
     steps:
     - uses: actions/checkout@v2
-    - name: Build-And-Deploy
-      uses: ./.github/actions/build-and-deploy
-      timeout-minutes: 22
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
       with:
-        environment: "dev"
-        project-id: ${{ secrets.PROJECT_ID }}
-        workload-identity-provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-        is-staging: true
-        nr-license-key: ${{ secrets.API_KEY }}
-  build-deploy-staging:
-    if: contains('svetlanabrennan,TylerHelmuth,jack-berg,nrcventura,martinkuba,alanwest,reese-lee', github.actor) && github.ref == 'refs/heads/main'
-    permissions:
-        contents: 'read'
-        id-token: 'write'
-    runs-on: ubuntu-latest
-    environment: staging
-    env:
-      OTEL_EXPORTER_OTLP_ENDPOINT: https://staging-otlp.nr-data.net:4317
-      OTEL_EXPORTER_OTLP_ENDPOINT_INFINITE_TRACING: ${{ secrets.INFINITE_TRACING_ENDPOINT }}"
-      NEW_RELIC_API_KEY: ${{ secrets.API_KEY }}
-      NEW_RELIC_LICENSE_KEY: ${{ secrets.API_KEY }}
-      NEW_RELIC_HOST: staging-collector.newrelic.com
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build-And-Deploy
-      uses: ./.github/actions/build-and-deploy
-      timeout-minutes: 22
-      with:
-        environment: "staging"
-        project-id: ${{ secrets.PROJECT_ID }}
-        workload-identity-provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-        is-staging: true
-        nr-license-key: ${{ secrets.API_KEY }}
-  build-deploy-prod:
-    if: contains('svetlanabrennan,TylerHelmuth,jack-berg,nrcventura,martinkuba,alanwest,reese-lee', github.actor) && github.ref == 'refs/heads/main'
-    permissions:
-        contents: 'read'
-        id-token: 'write'
-    runs-on: ubuntu-latest
-    environment: production
-    env:
-      OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
-      OTEL_EXPORTER_OTLP_ENDPOINT_INFINITE_TRACING: ${{ secrets.INFINITE_TRACING_ENDPOINT }}"
-      NEW_RELIC_API_KEY: ${{ secrets.API_KEY }}
-      NEW_RELIC_LICENSE_KEY: ${{ secrets.API_KEY }}
-      NEW_RELIC_HOST: collector.newrelic.com
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build-And-Deploy
-      uses: ./.github/actions/build-and-deploy
-      timeout-minutes: 22
-      with:
-        environment: "prod"
-        project-id: ${{ secrets.PROJECT_ID }}
-        workload-identity-provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-        is-staging: false
-        nr-license-key: ${{ secrets.API_KEY }}
+        workload_identity_provider: '${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}'
+        service_account: 'microservices-otel-demo@${{ secrets.PROJECT_ID }}.iam.gserviceaccount.com'
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v0'
+    - name: install dependencies
+      shell: bash
+      run: |
+        chmod +x .github/workflows/install-dependencies.sh
+        .github/workflows/install-dependencies.sh
+    - name: connect to cluster
+      shell: bash
+      run: gcloud container clusters get-credentials ${{ inputs.environment }}-microservices-otel-demo --zone us-central1-a --project ${{ secrets.PROJECT_ID }}
+    - name: configure docker cli to authenticate to GCR
+      shell: bash
+      run: gcloud auth configure-docker -q
+    - name: Add New Relic Helm Repository
+      shell: bash
+      run: helm repo add newrelic https://helm-charts.newrelic.com
+    - name: Deploy New Relic Kubernetes Integration
+      shell: bash
+      run: |
+        helm upgrade --install newrelic-bundle newrelic/nri-bundle \
+          -f values-newrelic.yaml \
+          --set global.nrStaging=${{ inputs.is-staging }} \
+          --set global.licenseKey=${{ secrets.API_KEY }} \
+          --set global.cluster=${{ inputs.environment }}-microservices-otel-demo \
+          --namespace newrelic --create-namespace
+    - name: build and deploy
+      shell: bash
+      run: skaffold run --default-repo=gcr.io/${{ secrets.PROJECT_ID }}

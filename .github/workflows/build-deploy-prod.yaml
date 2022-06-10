@@ -1,0 +1,19 @@
+name: "Build and Deploy Production"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy-prod:
+    if: contains('svetlanabrennan,TylerHelmuth,jack-berg,nrcventura,martinkuba,alanwest,reese-lee', github.actor) && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/build-deploy.yaml
+    secrets: inherit
+    with:
+      environment: "prod"
+      environment-full: "production"
+      is-staging: false
+      otlp-endpoint: "https://otlp.nr-data.net:4317"
+      nr-host: "collector.newrelic.com"

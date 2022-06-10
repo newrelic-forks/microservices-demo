@@ -1,0 +1,19 @@
+name: "Build and Deploy Staging"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy-staging:
+    if: contains('svetlanabrennan,TylerHelmuth,jack-berg,nrcventura,martinkuba,alanwest,reese-lee', github.actor) && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/build-deploy.yaml
+    secrets: inherit
+    with:
+      environment: "staging"
+      environment-full: "staging"
+      is-staging: true
+      otlp-endpoint: "https://staging-otlp.nr-data.net:4317"
+      nr-host: "staging-collector.newrelic.com"
