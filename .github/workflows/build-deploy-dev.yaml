@@ -9,7 +9,7 @@ on:
 jobs:
   build-deploy-dev:
     if: contains('svetlanabrennan,TylerHelmuth,jack-berg,nrcventura,martinkuba,alanwest,reese-lee', github.actor)
-    uses: ./.github/workflows/build-deploy.yaml
+    uses: ./.github/workflows/reusable-build-deploy.yaml
     secrets: inherit
     with:
       environment: "dev"

@@ -1,4 +1,4 @@
-name: "Build and Deploy"
+name: "Reusable Build and Deploy"
 
 on:
   workflow_call:
@@ -70,6 +70,7 @@ jobs:
           --set global.licenseKey=${{ secrets.API_KEY }} \
           --set global.cluster=${{ inputs.environment }}-microservices-otel-demo \
           --namespace newrelic --create-namespace
-    - name: build and deploy
+    - name: run skaffold
       shell: bash
       run: skaffold run --default-repo=gcr.io/${{ secrets.PROJECT_ID }}
+      timeout-minutes: 20
