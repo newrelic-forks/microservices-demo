@@ -1,4 +1,4 @@
-FROM otel/opentelemetry-collector-contrib:0.49.0
+FROM otel/opentelemetry-collector-contrib:0.53.0
 
 ARG OTEL_EXPORTER_OTLP_ENDPOINT
 ARG REDIS_ENDPOINT

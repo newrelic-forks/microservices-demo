@@ -1,4 +1,4 @@
-FROM otel/opentelemetry-collector-contrib:0.49.0
+FROM otel/opentelemetry-collector-contrib:0.53.0
 
 ARG NEW_RELIC_API_KEY
 ARG OTEL_EXPORTER_OTLP_ENDPOINT
