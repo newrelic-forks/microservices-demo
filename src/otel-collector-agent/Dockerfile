@@ -9,4 +9,4 @@ ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
 COPY ./collector.yaml /etc/otel/config.yaml
 
 ENTRYPOINT ["/otelcol-contrib"]
-CMD ["/otelcol-contrib", "--config=/etc/otel/config.yaml", "--feature-gates=receiver.hostmetricsreceiver.removeDirectionAttributePagingMetrics,receiver.hostmetricsreceiver.removeDirectionAttributeProcessMetrics,receiver.hostmetricsreceiver.removeDirectionAttribute"]
+CMD ["/otelcol-contrib", "--config=/etc/otel/config.yaml", "--feature-gates=receiver.hostmetricsreceiver.emitMetricsWithoutDirectionAttribute"]
