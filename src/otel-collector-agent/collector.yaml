@@ -33,11 +33,14 @@ processors:
     include:
       match_type: strict
       metrics:
+        - system.network.io
         - system.network.io.receive
         - system.network.io.transmit
         - system.disk.operations
+        - system.network.dropped
         - system.network.dropped.receive
         - system.network.dropped.transmit
+        - system.network.packets
         - system.network.packets.receive
         - system.network.packets.transmit
         - process.cpu.time
@@ -80,7 +83,7 @@ service:
     metrics:
       receivers: [ hostmetrics, otlp ]
       processors: [ resourcedetection, k8sattributes, resource, cumulativetodelta, batch ]
-      exporters: [ otlp ]
+      exporters: [ otlp,logging ]
     traces:
       receivers: [ otlp ]
       processors: [ resourcedetection, k8sattributes, resource, batch ]
