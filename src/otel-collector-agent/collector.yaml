@@ -30,12 +30,6 @@ receivers:
 processors:
   batch:
   cumulativetodelta:
-    metrics:
-      - system.network.io
-      - system.disk.operations
-      - system.network.dropped
-      - system.network.packets
-      - process.cpu.time
   resource:
     attributes:
       - key: host.id
@@ -58,8 +52,9 @@ processors:
         - k8s.node.name
         - k8s.pod.start_time
     pod_association:
-      - from: resource_attribute
-        name: k8s.pod.uid
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.uid
 
 exporters:
   otlp:
