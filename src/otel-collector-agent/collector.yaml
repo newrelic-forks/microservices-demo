@@ -69,7 +69,7 @@ service:
     metrics:
       receivers: [ hostmetrics, otlp ]
       processors: [ resourcedetection, k8sattributes, resource, cumulativetodelta, batch ]
-      exporters: [ otlp,logging ]
+      exporters: [ otlp ]
     traces:
       receivers: [ otlp ]
       processors: [ resourcedetection, k8sattributes, resource, batch ]
