@@ -16,6 +16,7 @@ FROM adoptopenjdk/openjdk11
 ENV OTEL_SERVICE_NAME=AdService
 ENV OTEL_LOGS_EXPORTER=otlp
 ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=DELTA
+ENV OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION=EXPONENTIAL_BUCKET_HISTOGRAM
 
 # Download Stackdriver Profiler Java agent
 RUN apt-get -y update && apt-get install -qqy \
@@ -32,7 +33,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.11 && \
 
 RUN mkdir -p /app/auto-agent && \
     wget -q -O /app/auto-agent/opentelemetry-agent.jar \
-    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.15.0/opentelemetry-javaagent.jar
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.16.0/opentelemetry-javaagent.jar
 
 WORKDIR /app
 COPY --from=builder /app .
