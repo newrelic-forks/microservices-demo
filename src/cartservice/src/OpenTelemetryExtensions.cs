@@ -35,6 +35,7 @@ namespace cartservice.OpenTelemetry
                 builder
                     .SetResourceBuilder(ResourceBuilder)
                     .AddAspNetCoreInstrumentation()
+                    .AddRuntimeInstrumentation()
                     .AddOtlpExporter((exporterOptions, metricReaderOptions) =>
                     {
                         metricReaderOptions.TemporalityPreference = MetricReaderTemporalityPreference.Delta;
