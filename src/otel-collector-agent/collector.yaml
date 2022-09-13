@@ -29,7 +29,6 @@ receivers:
 
 processors:
   batch:
-  cumulativetodelta:
   resource:
     attributes:
       - key: host.id
@@ -68,7 +67,7 @@ service:
   pipelines:
     metrics:
       receivers: [ hostmetrics, otlp ]
-      processors: [ resourcedetection, k8sattributes, resource, cumulativetodelta, batch ]
+      processors: [ resourcedetection, k8sattributes, resource, batch ]
       exporters: [ otlp ]
     traces:
       receivers: [ otlp ]

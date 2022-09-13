@@ -36,10 +36,13 @@ namespace cartservice.OpenTelemetry
                     .SetResourceBuilder(ResourceBuilder)
                     .AddAspNetCoreInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddOtlpExporter((exporterOptions, metricReaderOptions) =>
-                    {
-                        metricReaderOptions.TemporalityPreference = MetricReaderTemporalityPreference.Delta;
-                    });
+
+                    // Using cumulative metrics
+                    .AddOtlpExporter();
+                    // .AddOtlpExporter((exporterOptions, metricReaderOptions) =>
+                    // {
+                    //     metricReaderOptions.TemporalityPreference = MetricReaderTemporalityPreference.Delta;
+                    // });
             });
         }
 
