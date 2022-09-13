@@ -119,7 +119,7 @@ func main() {
 
 		// Using cumulative metrics
 		// me, err := otlpmetric.New(ctx, metricClient, otlpmetric.WithMetricAggregationTemporalitySelector(preferDelta))
-		me, err := otlpmetric.New(ctx, metricClient, otlpmetric.WithMetricAggregationTemporalitySelector(preferDelta))
+		me, err := otlpmetric.New(ctx, metricClient)
 
 		if err != nil {
 			log.WithError(err).Fatal("failed to create metricExporter")
