@@ -26,6 +26,14 @@ receivers:
   otlp:
     protocols:
       grpc:
+  prometheus:
+    config:
+      scrape_configs:
+        # Scrape own metrics via prometheus
+        - job_name: 'otel-collector-agent' # job_name maps to service.name
+          scrape_interval: 5s
+          static_configs:
+            - targets: [ '0.0.0.0:8888' ]
 
 processors:
   batch:
@@ -34,6 +42,11 @@ processors:
     attributes:
       - key: host.id
         from_attribute: host.name
+        action: upsert
+  resource/collector:
+    attributes:
+      - key: service.instance.id
+        value: $POD_NAME
         action: upsert
   resourcedetection:
     detectors: [ gke, gce ]
@@ -77,4 +90,9 @@ service:
     logs:
       receivers: [ otlp ]
       processors: [ resourcedetection, k8sattributes, resource, batch ]
+      exporters: [ otlp ]
+    # Collector observability pipeline
+    metrics/collector:
+      receivers: [ prometheus ]
+      processors: [ resource/collector, cumulativetodelta, batch ]
       exporters: [ otlp ]
