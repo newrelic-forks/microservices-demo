@@ -10,6 +10,6 @@ ENV OTEL_EXPORTER_OTLP_ENDPOINT_INFINITE_TRACING=${OTEL_EXPORTER_OTLP_ENDPOINT_I
 
 COPY ./collector.yaml /etc/otel/config.yaml
 
-ENTRYPOINT ["/otelcorecol"]
-CMD ["--config", "/etc/otel/config.yaml", "--feature-gates=processor.cumulativetodeltaprocessor.EnableHistogramSupport"]
+ENTRYPOINT ["/otelcol-contrib"]
+CMD ["/otelcol-contrib", "--config=/etc/otel/config.yaml", "--feature-gates=processor.cumulativetodeltaprocessor.EnableHistogramSupport"]
 EXPOSE 55680 55679 9411 14250 14268 13133 4317 4318
