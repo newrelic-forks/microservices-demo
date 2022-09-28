@@ -33,6 +33,10 @@ sudo apt-get update && \
 sudo apt-get install -y dotnet-sdk-6.0
 echo "✅ dotnet installed"
 
+# The latest version of the ubuntu image has homebrew installed on image but not added to path
+# See release notes for details: https://github.com/actions/runner-images/blob/releases/ubuntu20/20220922/images/linux/Ubuntu2004-Readme.md#ubuntu-20045-lts
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
 # install kubectl
 brew install kubectl
 echo "✅ kubectl installed"
