@@ -48,10 +48,7 @@ spec:
         component: otel-collector
     spec:
       containers:
-      - command:
-          - "/otelcol"
-          - "--config=/etc/otel/config.yaml"
-        image: otel-collector
+      - image: otel-collector
         name: otel-collector
         resources:
           limits:
