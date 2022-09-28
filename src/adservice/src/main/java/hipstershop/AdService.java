@@ -18,6 +18,7 @@ package hipstershop;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
@@ -29,11 +30,14 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.logs.LoggerProvider;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -44,6 +48,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,7 +78,9 @@ public final class AdService {
     }
   }
 
-  private void start() throws IOException {
+  private void start(SdkLoggerProvider loggerProvider) throws IOException {
+    io.opentelemetry.api.logs.Logger runtimeEventLogger =
+        loggerProvider.loggerBuilder(AdService.class.getName()).setEventDomain("runtime").build();
     int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "9555"));
     healthMgr = new HealthStatusManager();
 
@@ -82,11 +90,15 @@ public final class AdService {
             .addService(healthMgr.getHealthService())
             .build()
             .start();
+    runtimeEventLogger.eventBuilder("startup").emit();
     logger.info("Ad Service started, listening on " + port);
+
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
+                  runtimeEventLogger.eventBuilder("shutdown").emit();
+                  loggerProvider.shutdown().join(10, TimeUnit.SECONDS);
                   // Use stderr here since the logger may have been reset by its JVM shutdown hook.
                   System.err.println(
                       "*** shutting down gRPC ads server since JVM is shutting down");
@@ -296,22 +308,55 @@ public final class AdService {
   /** Main launches the server from the command line. */
   public static void main(String[] args)
       throws IOException, InterruptedException, ClassNotFoundException {
-    JdbcTemplate jdbcTemplate = setUpDatabase();
+    SdkLoggerProvider loggerProvider = setupLoggerProvider();
+    JdbcTemplate jdbcTemplate = setUpDatabase(loggerProvider);
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
     AdService adService = new AdService(jdbcTemplate);
-    adService.start();
+    adService.start(loggerProvider);
     adService.blockUntilShutdown();
   }
 
-  private static JdbcTemplate setUpDatabase() throws ClassNotFoundException {
+  private static SdkLoggerProvider setupLoggerProvider() {
+    // Setup a logger provider separate from the otel java agent to prototype emitting events
+    // TODO: remove and use logger provider from GlobalLoggerProvider once otel java agent 1.19.0 is
+    // published
+    return AutoConfiguredOpenTelemetrySdk.builder()
+        .setResultAsGlobal(false)
+        .addPropertiesSupplier(
+            () ->
+                ImmutableMap.of(
+                    "otel.traces.exporter", "none",
+                    "otel.metrics.exporter", "none",
+                    "otel.logs.exporter", "otlp"))
+        .registerShutdownHook(false) // Manually shutdown the sdk logger provider after emitting shutdown event
+        .build()
+        .getOpenTelemetrySdk()
+        .getSdkLoggerProvider();
+  }
+
+  private static JdbcTemplate setUpDatabase(LoggerProvider loggerProvider)
+      throws ClassNotFoundException {
     Class.forName("org.h2.Driver");
+    String connectionString = "jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1";
     SingleConnectionDataSource dataSource =
-        new SingleConnectionDataSource("jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1", "sa", "sa", true);
+        new SingleConnectionDataSource(connectionString, "sa", "sa", true);
 
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     jdbcTemplate.update(
         "create table ads( id identity, category varchar(30), redirectUrl varchar(255), text varchar(255))");
+    loggerProvider
+        .loggerBuilder(AdService.class.getName())
+        .setEventDomain("db")
+        .build()
+        .eventBuilder("migration")
+        .setAllAttributes(
+            Attributes.builder()
+                .put("db.system", "h2")
+                .put("db.connection_string", connectionString)
+                .build())
+        .emit();
+
     ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
     for (String category : adsMap.keys()) {
       ImmutableList<Ad> ads = adsMap.get(category);
