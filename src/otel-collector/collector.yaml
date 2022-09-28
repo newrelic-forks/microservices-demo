@@ -9,12 +9,26 @@ receivers:
     protocols:
       grpc:
       http:
+  prometheus:
+    config:
+      scrape_configs:
+        # Scrape own metrics via prometheus
+        - job_name: 'otel-collector' # job_name maps to service.name
+          scrape_interval: 5s
+          static_configs:
+            - targets: [ '0.0.0.0:8888' ]
 processors:
   batch:
   memory_limiter:
     check_interval: 2s
     limit_mib: 1800
     spike_limit_mib: 500
+  cumulativetodelta:
+  resource/collector:
+    attributes:
+      - key: service.instance.id
+        value: $POD_NAME
+        action: upsert
 exporters:
   otlp:
     endpoint: $OTEL_EXPORTER_OTLP_ENDPOINT
@@ -39,3 +53,8 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
+    # Collector observability pipeline
+    metrics/collector:
+      receivers: [ prometheus ]
+      processors: [ resource/collector, cumulativetodelta, batch ]
+      exporters: [ otlp ]

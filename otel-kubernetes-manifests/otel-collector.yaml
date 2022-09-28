@@ -48,10 +48,7 @@ spec:
         component: otel-collector
     spec:
       containers:
-      - command:
-          - "/otelcol"
-          - "--config=/etc/otel/config.yaml"
-        image: otel-collector
+      - image: otel-collector
         name: otel-collector
         resources:
           limits:
@@ -64,6 +61,11 @@ spec:
         - containerPort: 4317 # Default OpenTelemetry gRPC receiver port.
         - containerPort: 55679 # Default endpoint for ZPages.
         - containerPort: 4318 # Default OpenTelemetry HTTP receiver port.
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
         livenessProbe:
           httpGet:
             path: /
