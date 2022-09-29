@@ -7,6 +7,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     mavenLocal()
 }
 
@@ -17,7 +18,8 @@ version = "0.1.0-SNAPSHOT"
 def grpcVersion = "1.46.0"
 def jacksonVersion = "2.12.1"
 def protocVersion = "3.21.1"
-def openTelemetryVersion = "1.18.0"
+def openTelemetryVersion = "1.19.0-SNAPSHOT"
+def openTelemetryAlphaVersion = "1.19.0-alpha-SNAPSHOT"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -35,6 +37,10 @@ dependencies {
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:1.18.1",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+                "io.opentelemetry:opentelemetry-api-logs:${openTelemetryAlphaVersion}",
+                "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:${openTelemetryAlphaVersion}",
+                "io.opentelemetry:opentelemetry-sdk-logs:${openTelemetryAlphaVersion}",
+                "io.opentelemetry:opentelemetry-exporter-otlp-logs:${openTelemetryAlphaVersion}",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty-shaded:${grpcVersion}",
