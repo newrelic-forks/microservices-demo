@@ -34,6 +34,7 @@ receivers:
           scrape_interval: 5s
           static_configs:
             - targets: [ '0.0.0.0:8888' ]
+  k8s_events:
 
 processors:
   batch:
@@ -90,6 +91,10 @@ service:
     logs:
       receivers: [ otlp ]
       processors: [ resourcedetection, k8sattributes, resource, batch ]
+      exporters: [ otlp ]
+    logs/k8s:
+      receivers: [ k8s_events ]
+      processors: [ batch ]
       exporters: [ otlp ]
     # Collector observability pipeline
     metrics/collector:
