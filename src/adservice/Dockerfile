@@ -33,7 +33,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.11 && \
 
 RUN mkdir -p /app/auto-agent && \
     wget -q -O /app/auto-agent/opentelemetry-agent.jar \
-    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.18.0/opentelemetry-javaagent.jar
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.19.0/opentelemetry-javaagent.jar
 
 WORKDIR /app
 COPY --from=builder /app .

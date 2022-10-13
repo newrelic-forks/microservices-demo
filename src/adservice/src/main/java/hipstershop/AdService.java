@@ -31,6 +31,7 @@ import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.logs.LoggerProvider;
 import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
@@ -78,7 +79,7 @@ public final class AdService {
     }
   }
 
-  private void start(SdkLoggerProvider loggerProvider) throws IOException {
+  private void start(LoggerProvider loggerProvider) throws IOException {
     io.opentelemetry.api.logs.Logger runtimeEventLogger =
         loggerProvider.loggerBuilder(AdService.class.getName()).setEventDomain("runtime").build();
     int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "9555"));
@@ -97,9 +98,8 @@ public final class AdService {
         .addShutdownHook(
             new Thread(
                 () -> {
+                  // No guarantee that this will execute before SdkLoggerProvider is shutdown
                   runtimeEventLogger.eventBuilder("shutdown").emit();
-                  loggerProvider.shutdown().join(10, TimeUnit.SECONDS);
-                  // Use stderr here since the logger may have been reset by its JVM shutdown hook.
                   System.err.println(
                       "*** shutting down gRPC ads server since JVM is shutting down");
                   AdService.this.stop();
@@ -308,31 +308,13 @@ public final class AdService {
   /** Main launches the server from the command line. */
   public static void main(String[] args)
       throws IOException, InterruptedException, ClassNotFoundException {
-    SdkLoggerProvider loggerProvider = setupLoggerProvider();
+    LoggerProvider loggerProvider = GlobalLoggerProvider.get();
     JdbcTemplate jdbcTemplate = setUpDatabase(loggerProvider);
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
     AdService adService = new AdService(jdbcTemplate);
     adService.start(loggerProvider);
     adService.blockUntilShutdown();
-  }
-
-  private static SdkLoggerProvider setupLoggerProvider() {
-    // Setup a logger provider separate from the otel java agent to prototype emitting events
-    // TODO: remove and use logger provider from GlobalLoggerProvider once otel java agent 1.19.0 is
-    // published
-    return AutoConfiguredOpenTelemetrySdk.builder()
-        .setResultAsGlobal(false)
-        .addPropertiesSupplier(
-            () ->
-                ImmutableMap.of(
-                    "otel.traces.exporter", "none",
-                    "otel.metrics.exporter", "none",
-                    "otel.logs.exporter", "otlp"))
-        .registerShutdownHook(false) // Manually shutdown the sdk logger provider after emitting shutdown event
-        .build()
-        .getOpenTelemetrySdk()
-        .getSdkLoggerProvider();
   }
 
   private static JdbcTemplate setUpDatabase(LoggerProvider loggerProvider)
