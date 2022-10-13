@@ -14,6 +14,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,7 @@ namespace cartservice.services
 {
     public class CartService : Hipstershop.CartService.CartServiceBase
     {
+        private static readonly HttpClient _httpClient = new HttpClient();
         private static readonly Random _random = new Random();
         private readonly static Empty Empty = new Empty();
         private ICartStore _cartStore;
@@ -38,6 +40,7 @@ namespace cartservice.services
 
         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
         {
+            await _httpClient.GetStringAsync("https://developer.newrelic.com");
             await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
             _logger.LogInformation("CartService.AddItem UserId={UserId}, ProductId={ProductId}, Quantity={Quantity}",
                 request.UserId,
