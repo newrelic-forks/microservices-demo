@@ -19,9 +19,10 @@ namespace cartservice.OpenTelemetry
         public static void AddOpenTelemetry(this IServiceCollection services, ICartStore cartStore)
         {
             services.AddOpenTelemetryTracing(builder => {
-                builder.SetResourceBuilder(ResourceBuilder);
-                
-                builder.AddAspNetCoreInstrumentation();
+                builder
+                    .SetResourceBuilder(ResourceBuilder)
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation();
 
                 if (cartStore is RedisCartStore redisCartStore)
                 {
