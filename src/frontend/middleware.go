@@ -193,11 +193,8 @@ func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if spanName == "" {
 		spanName = fmt.Sprintf("HTTP %s route not found", r.Method)
 	}
-	labels := []attribute.KeyValue{
-		attribute.String("span.name", spanName),
-		attribute.String("span.kind", trace.SpanKindServer.String()),
-	}
-	labels = append(labels, semconv.HTTPServerMetricAttributesFromHTTPRequest(serviceName, r)...)
+	labels := semconv.HTTPServerMetricAttributesFromHTTPRequest(serviceName, r)
+	labels = append(labels, attribute.KeyValue{Key: "http.route", Value: attribute.StringValue(spanName)})
 
 	start := time.Now()
 	defer func() {
