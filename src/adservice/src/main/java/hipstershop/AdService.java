@@ -29,6 +29,7 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.logs.LoggerProvider;
@@ -305,6 +306,9 @@ public final class AdService {
   public static void main(String[] args)
       throws IOException, InterruptedException, ClassNotFoundException {
     LoggerProvider loggerProvider = GlobalLoggerProvider.get();
+    OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
+    Gc.registerObservers(openTelemetry);
+    MemoryPools.registerObservers(openTelemetry);
     JdbcTemplate jdbcTemplate = setUpDatabase(loggerProvider);
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
