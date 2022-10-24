@@ -54,7 +54,11 @@ public final class MemoryPools {
     return measurement -> {
       for (int i = 0; i < poolBeans.size(); i++) {
         Attributes attributes = attributeSets.get(i);
-        long value = extractor.apply(poolBeans.get(i).getCollectionUsage());
+        MemoryUsage memoryUsage = poolBeans.get(i).getCollectionUsage();
+        if (memoryUsage == null) {
+          continue;
+        }
+        long value = extractor.apply(memoryUsage);
         if (value != -1) {
           measurement.record(value, attributes);
         }
