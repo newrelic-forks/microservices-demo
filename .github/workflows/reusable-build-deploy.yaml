@@ -55,6 +55,9 @@ jobs:
       run: |
         chmod +x .github/workflows/install-dependencies.sh
         .github/workflows/install-dependencies.sh
+    - name: Install kubectl with gcloud
+      shell: bash
+      run: gcloud components install kubectl
     - name: connect to cluster
       shell: bash
       run: gcloud container clusters get-credentials ${{ inputs.environment }}-microservices-otel-demo --zone us-central1-a --project ${{ secrets.PROJECT_ID }}
