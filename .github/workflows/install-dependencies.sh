@@ -38,7 +38,7 @@ echo "✅ dotnet installed"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # install kubectl
-brew install kubectl@1.22
+brew install kubectl
 echo "✅ kubectl installed"
 
 brew install helm

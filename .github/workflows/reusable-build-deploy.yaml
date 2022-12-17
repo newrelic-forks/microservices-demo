@@ -47,6 +47,9 @@ jobs:
         service_account: 'microservices-otel-demo@${{ secrets.PROJECT_ID }}.iam.gserviceaccount.com'
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v0'
+    - name: Install gke-gcloud-auth-plugin so that kubectl 1.26+ will work
+      shell: bash
+      run: gcloud components install gke-gcloud-auth-plugin
     - name: install dependencies
       shell: bash
       run: |
