@@ -23,7 +23,7 @@
     "@opentelemetry/sdk-trace-base": "^1.4.0",
     "@opentelemetry/sdk-trace-node": "^1.4.0",
     "@opentelemetry/semantic-conventions": "^1.4.0",
-    "async": "3.2.3",
+    "async": "3.2.4",
     "google-protobuf": "3.13.0",
     "pino": "5.17.0",
     "request": "2.88.2",
