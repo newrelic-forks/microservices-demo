@@ -45,7 +45,7 @@ googleapis-common-protos==1.56.0
     # via
     #   google-api-core
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.44.0
+grpcio==1.53.2
     # via
     #   -r requirements.in
     #   google-api-core
