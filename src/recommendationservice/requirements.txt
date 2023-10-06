@@ -80,7 +80,7 @@ opentelemetry-api==1.1.0
     #   opentelemetry-sdk
 opentelemetry-exporter-otlp-proto-grpc==1.1.0
     # via -r requirements.in
-opentelemetry-instrumentation==0.20b0
+opentelemetry-instrumentation==0.41b0
     # via opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-grpc==0.20b0
     # via -r requirements.in
