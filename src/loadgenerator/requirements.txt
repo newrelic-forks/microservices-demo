@@ -59,7 +59,7 @@ urllib3==1.26.9
     # via
     #   -r requirements.in
     #   requests
-werkzeug==1.0.1
+werkzeug==3.0.1
     # via
     #   flask
     #   locust
