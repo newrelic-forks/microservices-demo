@@ -31,11 +31,11 @@ geventhttpclient==1.4.4
     # via locust
 greenlet==0.4.17
     # via gevent
-idna==2.10
+idna==3.7
     # via requests
 itsdangerous==1.1.0
     # via flask
-jinja2==2.11.3
+jinja2==3.1.4
     # via flask
 locust==1.6.0
     # via -r requirements.in
@@ -47,7 +47,7 @@ psutil==5.7.2
     # via locust
 pyzmq==19.0.2
     # via locust
-requests==2.27.1
+requests==2.32.2
     # via
     #   -r requirements.in
     #   locust
@@ -55,11 +55,11 @@ six==1.15.0
     # via
     #   flask-cors
     #   geventhttpclient
-urllib3==1.26.9
+urllib3==1.26.19
     # via
     #   -r requirements.in
     #   requests
-werkzeug==1.0.1
+werkzeug==3.0.3
     # via
     #   flask
     #   locust
