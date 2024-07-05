@@ -59,7 +59,7 @@ httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.3
+idna==3.7
     # via requests
 opencensus==0.9.0
     # via
@@ -123,7 +123,7 @@ pytz==2022.1
     # via google-api-core
 pyyaml==6.0
     # via -r requirements.in
-requests==2.27.1
+requests==2.32.2
     # via
     #   -r requirements.in
     #   google-api-core
@@ -140,7 +140,7 @@ six==1.16.0
     #   grpcio
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.9
+urllib3==1.26.19
     # via
     #   -r requirements.in
     #   requests
@@ -151,3 +151,4 @@ wrapt==1.14.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
